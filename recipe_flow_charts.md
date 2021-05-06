@@ -8,37 +8,17 @@
 
 ## Register Name and Email with Password
 
-graph TD
-fetch("authenticationWrapper.fetchSignUpFormValues()")
-fetch --> register("authenticationWrapper.register(...)")
-register --> enroll("authenticationWrapper.enrollAuthenticator(...)")
-enroll --> verify("authenticationWrapper.verifyAuthenticator(...)")
-verify --> hasTokens{response.tokenResponse != null}
-hasTokens -- false --> enroll
-hasTokens -- true --> success(response.tokenResponse)
+![register name and email with password](flow_diagrams/register_name_and_email_with_password.svg)
 
 ## Register Name and Email with Additional Factors
 
-graph TD
-fetch("authenticationWrapper.fetchSignUpFormValues()")
-fetch --> register("authenticationWrapper.register(...)")
-register --> enroll("authenticationWrapper.enrollAuthenticator(...)")
-enroll --> verify("authenticationWrapper.verifyAuthenticator(...)")
-verify --> hasTokens{response.tokenResponse != null}
-hasTokens -- false --> enroll
-hasTokens -- true --> success(response.tokenResponse)
+![register name and email with additional factors](flow_diagrams/register_name_and_email_with_password.svg)
 
 # Password Recovery
 
 ## Recover Password with Email
    
-graph TD
-recover("authenticationWrapper.recoverPassword(..)")
-recover --> select("authenticationWrapper.selectForgotPasswordAuthenticator(..)")
-select --> verify("authenticationWrapper.verifyAuthenticator(..)")
-verify --> hasStatus{"AuthenticationStatus.AWAITING_PASSWORD_RESET"}
-hasStatus -- true --> changePassword("authenticationWrapper.changePassword(..)")
-hasStatus -- false --> select
+![recover password with email](flow_diagrams/recover_password_with_email.svg)
 
 # Social Auth
 
@@ -50,5 +30,4 @@ hasStatus -- false --> select
 
 ## Logout of Sample App
 
-graph TD
-revoke("authenticationWrapper.revokeToken(..)")
+![logout](flow_diagrams/logout.svg)
