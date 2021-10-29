@@ -86,6 +86,15 @@ class IdxResponseTest {
         assertThat(phoneAuthenticator.id).isEqualTo("auttbu5xyM4W2p68j5d6")
     }
 
+    @Test fun testMagicLinkOtp() {
+        val idxResponse = getIdxResponse("magic_link_otp_response.json")
+
+        val currentAuthenticator = idxResponse.authenticators.current!!
+        assertThat(currentAuthenticator.id).isEqualTo("aut5gn8p1c0jGB5nO0g4")
+        val trait = currentAuthenticator.traits.get<IdxOtpTrait>()!!
+        assertThat(trait.otp).isEqualTo("702255")
+    }
+
     @Test fun testTotp() {
         val idxResponse = getIdxResponse("totp.json")
 

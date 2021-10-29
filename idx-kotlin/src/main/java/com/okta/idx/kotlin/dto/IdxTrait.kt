@@ -102,6 +102,12 @@ class IdxProfileTrait internal constructor(
     val profile: Map<String, String>,
 ) : IdxAuthenticator.Trait
 
+/** Describes the OTP information associated with an [IdxAuthenticator]. */
+class IdxOtpTrait internal constructor(
+    /** The OTP to be shown to the user. */
+    val otp: String,
+) : IdxAuthenticator.Trait
+
 /** Describes the TOTP information associated with an [IdxAuthenticator]. */
 class IdxTotpTrait internal constructor(
     /** The base64 encoded image data associated with the QR code. */

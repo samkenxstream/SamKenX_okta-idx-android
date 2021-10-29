@@ -22,5 +22,6 @@ import kotlinx.serialization.UseSerializers
 
 @Serializable
 internal data class IntrospectRequest(
-    val interactionHandle: String,
+    val interactionHandle: String? = null,
+    val stateTokenExternalId: String? = null,
 )

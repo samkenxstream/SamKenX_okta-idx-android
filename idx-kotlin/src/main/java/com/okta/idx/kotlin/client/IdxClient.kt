@@ -22,6 +22,7 @@ import com.okta.idx.kotlin.dto.TokenResponse
 import com.okta.idx.kotlin.dto.copyValuesFromPrevious
 import com.okta.idx.kotlin.dto.v1.InteractContext
 import com.okta.idx.kotlin.dto.v1.InteractResponse
+import com.okta.idx.kotlin.dto.v1.IntrospectRequest
 import com.okta.idx.kotlin.dto.v1.Token
 import com.okta.idx.kotlin.dto.v1.asFormRequest
 import com.okta.idx.kotlin.dto.v1.asJsonRequest
@@ -66,9 +67,11 @@ class IdxClient internal constructor(
      *
      * This method is usually performed after an IdxClient is created, but can also be called at any time to identify what next remediation steps are available to the user.
      */
-    suspend fun resume(): IdxClientResult<IdxResponse> {
+    suspend fun resume(
+        resumeRequest: ResumeRequest = ResumeRequest.InteractionHandle
+    ): IdxClientResult<IdxResponse> {
         val request = withContext(configuration.computationDispatcher) {
-            introspectRequest(configuration, clientContext)
+            introspectRequest(configuration, clientContext, resumeRequest)
         }
 
         return configuration.performRequest<V1Response, IdxResponse>(request) {
@@ -167,5 +170,40 @@ class IdxClient internal constructor(
         }
 
         return configuration.performRequest(request, Token::toIdxResponse)
+    }
+
+    /**
+     * The [ResumeRequest] which is used to customize the behavior of the [IdxClient.resume] method.
+     */
+    sealed class ResumeRequest {
+        /**
+         * The default [ResumeRequest], which sends the interactionHandle to the introspect endpoint.
+         */
+        internal object InteractionHandle : ResumeRequest() {
+            override fun createRequest(clientContext: IdxClientContext): IntrospectRequest {
+                return IntrospectRequest(interactionHandle = clientContext.interactionHandle)
+            }
+        }
+
+        /**
+         * The [ResumeRequest] to be used with "Email Magic Link",
+         * which sends the [stateTokenExternalId] to the introspect endpoint.
+         */
+        class StateTokenExternalId(
+            /**
+             * The [stateTokenExternalId] from the "Email Magic Link".
+             */
+            private val stateTokenExternalId: String,
+            // TODO: Add a flag for sending interactionHandle?
+        ) : ResumeRequest() {
+            override fun createRequest(clientContext: IdxClientContext): IntrospectRequest {
+                return IntrospectRequest(
+                    interactionHandle = clientContext.interactionHandle,
+                    stateTokenExternalId = stateTokenExternalId
+                )
+            }
+        }
+
+        internal abstract fun createRequest(clientContext: IdxClientContext): IntrospectRequest
     }
 }

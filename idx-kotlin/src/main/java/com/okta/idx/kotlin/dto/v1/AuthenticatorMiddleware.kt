@@ -16,6 +16,7 @@
 package com.okta.idx.kotlin.dto.v1
 
 import com.okta.idx.kotlin.dto.IdxAuthenticator
+import com.okta.idx.kotlin.dto.IdxOtpTrait
 import com.okta.idx.kotlin.dto.IdxPollTrait
 import com.okta.idx.kotlin.dto.IdxProfileTrait
 import com.okta.idx.kotlin.dto.IdxRecoverTrait
@@ -68,6 +69,7 @@ internal fun Authenticator.toIdxAuthenticator(
     poll?.toIdxRemediation(json)?.let { traits += IdxPollTrait(it, poll.refresh?.toInt() ?: 0, id) }
     profile?.let { traits += IdxProfileTrait(it) }
     contextualData?.toQrCodeTrait()?.let { traits += it }
+    contextualData?.toOtpTrait()?.let { traits += it }
 
     return IdxAuthenticator(
         id = id,
@@ -140,6 +142,11 @@ private fun Map<String, JsonElement>.toQrCodeTrait(): IdxAuthenticator.Trait? {
     val imageData = qrCode.stringValue("href") ?: return null
     val sharedSecret = (get("sharedSecret") as? JsonPrimitive?)?.content
     return IdxTotpTrait(imageData = imageData, sharedSecret = sharedSecret)
+}
+
+private fun Map<String, JsonElement>.toOtpTrait(): IdxAuthenticator.Trait? {
+    val otp = get("otp") as? JsonPrimitive? ?: return null
+    return IdxOtpTrait(otp.content)
 }
 
 private fun JsonObject.stringValue(key: String): String? {

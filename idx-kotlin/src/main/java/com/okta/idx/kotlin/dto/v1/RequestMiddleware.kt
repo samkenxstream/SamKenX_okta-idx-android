@@ -15,6 +15,7 @@
  */
 package com.okta.idx.kotlin.dto.v1
 
+import com.okta.idx.kotlin.client.IdxClient
 import com.okta.idx.kotlin.client.IdxClientConfiguration
 import com.okta.idx.kotlin.client.IdxClientContext
 import com.okta.idx.kotlin.dto.IdxRemediation
@@ -122,11 +123,12 @@ internal fun tokenRequestFromInteractionCode(
 internal fun introspectRequest(
     configuration: IdxClientConfiguration,
     clientContext: IdxClientContext,
+    resumeRequest: IdxClient.ResumeRequest,
 ): Request {
     val urlBuilder = configuration.issuer.newBuilder()
         .encodedPath("/idp/idx/introspect")
 
-    val introspectRequest = IntrospectRequest(clientContext.interactionHandle)
+    val introspectRequest = resumeRequest.createRequest(clientContext)
     val jsonBody = configuration.json.encodeToString(introspectRequest)
 
     return Request.Builder()

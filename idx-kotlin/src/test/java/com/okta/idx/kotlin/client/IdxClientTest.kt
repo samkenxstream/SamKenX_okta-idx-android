@@ -66,6 +66,24 @@ class IdxClientTest {
         assertThat(resumeResult.result.remediations).hasSize(4)
     }
 
+    @Test fun testResumeWithStateTokenExternalId(): Unit = runBlocking {
+        networkRule.enqueue(path("/oauth2/default/v1/interact")) { response ->
+            response.testBodyFromFile("client/interactResponse.json")
+        }
+        val introspectBody = """{"interactionHandle":"029ZAB","stateTokenExternalId":"ZAB029"}"""
+        networkRule.enqueue(path("/idp/idx/introspect"), body(introspectBody)) { response ->
+            response.testBodyFromFile("client/identifyRemediationResponse.json")
+        }
+
+        val clientResult = IdxClient.start(getConfiguration()) as IdxClientResult.Success<IdxClient>
+        val client = clientResult.result
+        assertThat(client.clientContext.interactionHandle).isEqualTo("029ZAB")
+
+        val resumeRequest = IdxClient.ResumeRequest.StateTokenExternalId("ZAB029")
+        val resumeResult = client.resume(resumeRequest) as IdxClientResult.Success<IdxResponse>
+        assertThat(resumeResult.result.remediations).hasSize(4)
+    }
+
     @Test fun testProceed(): Unit = runBlocking {
         networkRule.enqueue(path("/oauth2/default/v1/interact")) { response ->
             response.testBodyFromFile("client/interactResponse.json")

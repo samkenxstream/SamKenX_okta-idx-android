@@ -16,6 +16,7 @@
 package com.okta.idx.kotlin.dto.v1
 
 import com.google.common.truth.Truth.assertThat
+import com.okta.idx.kotlin.client.IdxClient
 import com.okta.idx.kotlin.client.IdxClientConfiguration
 import com.okta.idx.kotlin.client.IdxClientContext
 import com.okta.idx.kotlin.dto.createField
@@ -75,12 +76,23 @@ class RequestMiddlewareTest {
 
     @Test fun testIntrospectRequest() {
         val clientContext = IdxClientContext(codeVerifier = "123456", interactionHandle = "234567", state = "345678")
-        val request = introspectRequest(configuration, clientContext)
+        val request = introspectRequest(configuration, clientContext, IdxClient.ResumeRequest.InteractionHandle)
         assertThat(request.url).isEqualTo("https://test.okta.com/idp/idx/introspect".toHttpUrl())
         assertThat(request.method).isEqualTo("POST")
         val buffer = Buffer()
         request.body?.writeTo(buffer)
         assertThat(buffer.readUtf8()).isEqualTo("""{"interactionHandle":"234567"}""")
+        assertThat(request.body?.contentType()).isEqualTo("application/ion+json; okta-version=1.0.0; charset=utf-8".toMediaType())
+    }
+
+    @Test fun testIntrospectRequestWithExtraParameters() {
+        val clientContext = IdxClientContext(codeVerifier = "123456", interactionHandle = "234567", state = "345678")
+        val request = introspectRequest(configuration, clientContext, IdxClient.ResumeRequest.StateTokenExternalId("765432"))
+        assertThat(request.url).isEqualTo("https://test.okta.com/idp/idx/introspect".toHttpUrl())
+        assertThat(request.method).isEqualTo("POST")
+        val buffer = Buffer()
+        request.body?.writeTo(buffer)
+        assertThat(buffer.readUtf8()).isEqualTo("""{"interactionHandle":"234567","stateTokenExternalId":"765432"}""")
         assertThat(request.body?.contentType()).isEqualTo("application/ion+json; okta-version=1.0.0; charset=utf-8".toMediaType())
     }
 
